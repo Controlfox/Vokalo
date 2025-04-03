@@ -53,7 +53,7 @@ function Project() {
               </li>
             </ul>
             <p>
-              Vid senare utvecklingsfaser kan funktioner som AI, flerspelarläge
+              Vid senare utvecklingsfaser kommer funktioner som AI, flerspelarläge
               och mer avancerade spel.
             </p>
           </div>

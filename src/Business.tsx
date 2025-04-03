@@ -41,7 +41,7 @@ function Business() {
         </div>
         <div className='Bcard'>
           <p>
-            Projektet drivs som en star tup
+            Projektet drivs som en startup
             parallellt med studier, med
             fokus på en hållbar
             utvecklingstakt. Största
@@ -49,7 +49,7 @@ function Business() {
             användare, hantera tekniska
             utmaningar och balansera
             tiden effektivt. Riskerna
-            hanteras genom smar t
+            hanteras genom smart
             marknadsföring, noggrann
             testning och att prioritera
             funktioner som ger mest värde
