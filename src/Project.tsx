@@ -6,7 +6,8 @@ function Project() {
     return (
       <div>
         <h1>Projektidé</h1>
-        <div className='Card'>
+        <div className='card-container'>
+        <div className='card'>
           <h5>
             Funktioner i den första versionen:
           </h5>
@@ -27,7 +28,7 @@ function Project() {
             </li>
           </ul>
           </div>
-          <div className='Card'>
+          <div className='card'>
             <h5>
               Planerad prototyp:
             </h5>
@@ -55,6 +56,7 @@ function Project() {
               Vid senare utvecklingsfaser kan funktioner som AI, flerspelarläge
               och mer avancerade spel.
             </p>
+          </div>
           </div>
       </div>
     )

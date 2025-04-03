@@ -6,7 +6,8 @@ function Business() {
     return (
       <div>
         <h1>Affärsplan</h1>
-        <div className='Card'>
+        <div className='card-container'>
+        <div className='Bcard'>
           <p>
             Vokalo är en revolutionerande
             app som gör glosinlärning
@@ -22,7 +23,7 @@ function Business() {
             glosorna är korrekt besvarade
           </p>
         </div>
-        <div className='Card'>
+        <div className='Bcard'>
           <p>
             Målgruppen är barn i
             skolåldern och deras
@@ -38,7 +39,7 @@ function Business() {
             spelfunktioner.
           </p>
         </div>
-        <div className='Card'>
+        <div className='Bcard'>
           <p>
             Projektet drivs som en star tup
             parallellt med studier, med
@@ -54,6 +55,7 @@ function Business() {
             funktioner som ger mest värde
             från start.
           </p>
+        </div>
         </div>
       </div>
     )

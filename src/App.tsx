@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import './App.css'
 import Business from './Business'
@@ -6,9 +6,19 @@ import Project from './Project'
 import Contact from './Contact'
 import Home from './Home'
 
+
 function App() {
 
-  const [page, setPage] = useState("Home")
+  const [page, setPage] = useState("")
+
+
+
+  useEffect(() => {
+    const qp = new URLSearchParams(window.location.search)
+    const url = qp.get("page")
+
+
+  }, [page])
 
     return (
       <div>
@@ -16,10 +26,10 @@ function App() {
           <header className='header'>
             <nav>
               <ul>
-                <li><Link to="/">Startsida</Link></li>
-                <li><Link to="/Business">Affärsplan</Link></li>
-                <li><Link to="/Project">Projectidé</Link></li>
-                <li><Link to="/Contact">Kontakt</Link></li>
+                <button><Link to="/">Startsida</Link></button>
+                <button><Link to="/Business">Affärsplan</Link></button>
+                <button><Link to="/Project">Projektidé</Link></button>
+                <button><Link to="/Contact">Kontakt</Link></button>
               </ul>
             </nav>
           </header>
