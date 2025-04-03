@@ -18,6 +18,11 @@ p {
   font-family: "inter";
 }
 
+img {
+  width: 15%;
+  border-radius: 50%;
+}
+
 /* Layout */
 #root {
   text-align: center;
