@@ -6,24 +6,26 @@ const Glosquiz = () => {
     { question: 'Bucket', answer: 'hink' },
     { question: 'Blue', answer: 'blå' }
   ]);
-  
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
-  // Hämta sparad poäng från localStorage vid komponentens laddning
+  // Hämta sparade poäng från localStorage vid komponentens laddning
   useEffect(() => {
-    const savedScore = localStorage.getItem('quizScore');
+    const savedScore = localStorage.getItem('currentQuizScore');
     if (savedScore) {
       setScore(Number(savedScore)); // Sätt den sparade poängen
     }
   }, []);
 
-  // Spara poängen i localStorage när quizet är avslutat
+  // Spara poäng i localStorage när quizet är avslutat
   useEffect(() => {
     if (quizFinished) {
-      localStorage.setItem('quizScore', score.toString());
+      // Spara varje quizpoäng med ett unikt nyckelnamn
+      const quizId = `quizScore_${new Date().getTime()}`;
+      localStorage.setItem(quizId, score.toString());
     }
   }, [quizFinished, score]);
 
@@ -45,7 +47,7 @@ const Glosquiz = () => {
     setCurrentQuestionIndex(0);
     setUserAnswer('');
     setQuizFinished(false);
-    localStorage.removeItem('quizScore'); // Ta bort sparad poäng från localStorage
+    localStorage.removeItem('currentQuizScore'); // Ta bort sparad poäng från localStorage
   };
 
   return (
