@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import './App.css'
 import Business from './Business'
@@ -9,13 +9,11 @@ import Home from './Home'
 
 function App() {
 
-  const [page, setPage] = useState("")
+  const [page] = useState("")
 
 
 
   useEffect(() => {
-    const qp = new URLSearchParams(window.location.search)
-    const url = qp.get("page")
 
 
   }, [page])
