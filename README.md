@@ -23,7 +23,7 @@ Du behöver ha följande installerat på din dator:
 
 Först, klona projektet från GitHub i terminalen:
 
-git clone https://github.com/ditt-användarnamn/vokalo.git
+git clone https://github.com/controlfox/vokalo.git
 cd vokalo
 
 ### Installera beroenden
@@ -42,3 +42,8 @@ Det startar Vite och öppnar appen i din webbläsare.
 Det här projektet är byggt med följande:
 * React
 * Vite
+
+### Bygg projektet
+
+Kör npm run build i terminalen
+För att förhandsgranska projektet kör npm run preview i terminalen

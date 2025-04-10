@@ -5,6 +5,7 @@ import Business from './Business'
 import Project from './Project'
 import Contact from './Contact'
 import Home from './Home'
+import Login from './Login'
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
                 <button><Link to="/Business">Affärsplan</Link></button>
                 <button><Link to="/Project">Projektidé</Link></button>
                 <button><Link to="/Contact">Kontakt</Link></button>
+                <button><Link to="/Login">Logga in</Link></button>
               </ul>
             </nav>
           </header>
@@ -37,6 +39,7 @@ function App() {
               <Route path='/Business' element={<Business/>}/>
               <Route path='/Project' element={<Project/>}/>
               <Route path='/Contact' element={<Contact/>}/>
+              <Route path='/Login' element={<Login/>}/>
             </Routes>
           </main>
           <footer className='footer'>
