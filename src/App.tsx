@@ -6,6 +6,7 @@ import Project from './Project'
 import Contact from './Contact'
 import Home from './Home'
 import Login from './Login'
+import GlosQuiz from './GlosQuiz'
 
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
                 <button><Link to="/Project">Projektidé</Link></button>
                 <button><Link to="/Contact">Kontakt</Link></button>
                 <button><Link to="/Login">Logga in</Link></button>
+                <button><Link to="/GlosQuiz">Glosor</Link></button>
               </ul>
             </nav>
           </header>
@@ -40,6 +42,7 @@ function App() {
               <Route path='/Project' element={<Project/>}/>
               <Route path='/Contact' element={<Contact/>}/>
               <Route path='/Login' element={<Login/>}/>
+              <Route path='/GlosQuiz' element={<GlosQuiz/>}/>
             </Routes>
           </main>
           <footer className='footer'>
