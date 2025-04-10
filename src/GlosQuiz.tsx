@@ -1,52 +1,77 @@
-import { useState } from "react";
+import React, { useState, useEffect } from 'react';
 
-const GlosQuiz = () => {
-    const questions = [
-        { question: 'Vad betyder "här"?', options: ['here', 'house', 'car'], correctAnswer: 'here' },
-        { question: 'Vad betyder "bok"?', options: ['book', 'apple', 'pen'], correctAnswer: 'book' },
-        { question: 'Vad betyder "hund"?', options: ['dog', 'cat', 'fish'], correctAnswer: 'dog' }
-    ];
+const Glosquiz = () => {
+  const [questions] = useState([
+    { question: 'Apple', answer: 'äpple' },
+    { question: 'Bucket', answer: 'hink' },
+    { question: 'Blue', answer: 'blå' }
+  ]);
+  
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [score, setScore] = useState(0);
+  const [quizFinished, setQuizFinished] = useState(false);
 
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [score, setScore] = useState(0);
+  // Hämta sparad poäng från localStorage vid komponentens laddning
+  useEffect(() => {
+    const savedScore = localStorage.getItem('quizScore');
+    if (savedScore) {
+      setScore(Number(savedScore)); // Sätt den sparade poängen
+    }
+  }, []);
 
-    const handleAnswer = (answer: string) => {
-        if(answer == questions[currentQuestionIndex].correctAnswer) {
-            setScore(score + 1);
-            alert("Rätt svar!")
-        }
-        else {
-            alert("Fel svar!");
-        }
-        if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-        }
-        else {
-            localStorage.setItem("quizScore", score.toString());
-            //alert("Quizet är slut! Din poäng: " + score.toString());
-        }
-    };
+  // Spara poängen i localStorage när quizet är avslutat
+  useEffect(() => {
+    if (quizFinished) {
+      localStorage.setItem('quizScore', score.toString());
+    }
+  }, [quizFinished, score]);
 
-    return (
-        <div className="quiz-container">
-            <h2>Glosor Quiz</h2>
-            <p>
-                {questions[currentQuestionIndex].question}
-            </p>
-            <div>
-                {questions[currentQuestionIndex].options.map((option, index) => (
-                    <button key={index} onClick={() => handleAnswer(option)}>
-                        {option}
-                    </button>
-                ))}
-                <div>
-                    <p>
-                        Poäng: {score}
-                    </p>
-                </div>
-            </div>
+  const handleAnswer = () => {
+    if (userAnswer.trim().toLowerCase() === questions[currentQuestionIndex].answer.toLowerCase()) {
+      setScore(prevScore => prevScore + 1);
+    }
+
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+      setUserAnswer('');
+    } else {
+      setQuizFinished(true);
+    }
+  };
+
+  const handleReset = () => {
+    setScore(0);
+    setCurrentQuestionIndex(0);
+    setUserAnswer('');
+    setQuizFinished(false);
+    localStorage.removeItem('quizScore'); // Ta bort sparad poäng från localStorage
+  };
+
+  return (
+    <div className="glosquiz">
+      <h2>Glosquiz</h2>
+      {!quizFinished ? (
+        <>
+          <h3>{questions[currentQuestionIndex].question}</h3>
+          <input
+            type="text"
+            value={userAnswer}
+            onChange={(e) => setUserAnswer(e.target.value)}
+            placeholder="Ditt svar"
+          />
+          <button onClick={handleAnswer} disabled={userAnswer.trim() === ''}>
+            Svara
+          </button>
+        </>
+      ) : (
+        <div className="result">
+          <p>Dina poäng: {score} av {questions.length}</p>
+          <button onClick={handleReset}>Gör om quiz</button>
         </div>
-    )
-}
+      )}
+    </div>
+  );
+};
 
-export default GlosQuiz;
+export default Glosquiz;
