@@ -1,4 +1,10 @@
 [Projekt-rapport](Rapport.md)
+[Publicerad-app] (https://vokalo-app-b5nzr.ondigitalocean.app/)
+[Krav](Krav.md)
+
+### Versionshantering
+
+Jag använder mig av branching-strategi för att hålla dom olika inlämningarna separata.
 
 # Vokalo
 
