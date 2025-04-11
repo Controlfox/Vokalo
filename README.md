@@ -51,5 +51,6 @@ Det här projektet är byggt med följande:
 
 ### Bygg projektet
 
-Kör npm run build i terminalen
-För att förhandsgranska projektet kör npm run preview i terminalen
+Kör npm run build i terminalen och öppna länken.
+
+För att förhandsgranska projektet kör npm run preview i terminalen.
