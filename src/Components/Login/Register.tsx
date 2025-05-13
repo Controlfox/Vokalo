@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import "./Login.css"
+import "./Login.css";
+import bcrypt from 'bcryptjs';
 
 const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState<'parent' | 'child'>('parent');
+  const [parentUsername, setParentUsername] = useState(''); //För barnkonton
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validera om lösenordet och bekräftelsen är samma
@@ -23,8 +26,26 @@ const Register = () => {
       return;
     }
 
+    if(role == 'child') {
+        const parent = localStorage.getItem(parentUsername);
+        if(!parent) {
+            setErrorMessage('Föräldrakonto hittades inte!');
+            return;
+        }
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    const userData = {
+        username,
+        passwordHash: hash,
+        role,
+        ...(role == 'child' && {parent: parentUsername}),
+        ...(role == 'parent' && {children: []}),
+    };
+
     // Spara användarinformationen i localStorage
-    localStorage.setItem(username, JSON.stringify({ username, password }));
+    localStorage.setItem(username, JSON.stringify({ userData }));
     setErrorMessage('');
     alert('Användare skapad!');
     // Du kan här kanske navigera användaren till inloggningssidan efter skapandet
@@ -33,6 +54,10 @@ const Register = () => {
   return (
     <div className="register-container">
       <form onSubmit={handleRegister}>
+        <select value={role} onChange={(e) => setRole(e.target.value as 'parent' | 'child')}>
+            <option value="parent">Förälder</option>
+            <option value="child">Barn</option>
+        </select>
         <input
           type="text"
           placeholder="Användarnamn"
@@ -51,6 +76,13 @@ const Register = () => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
+        {role == 'child' && (
+            <input type="text"
+            placeholder='Förälderns användarnamn'
+            value={parentUsername}
+            onChange={(e) => setParentUsername(e.target.value)}
+            />
+        )}
         {errorMessage && <p className="error-message">{errorMessage}</p>}
         <button type="submit">Skapa användare</button>
       </form>

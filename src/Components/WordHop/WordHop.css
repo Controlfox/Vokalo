@@ -1,37 +1,55 @@
-.bokstavshopp-container {
+.wordhop-container {
     text-align: center;
     margin: 2rem auto;
     max-width: 500px;
-    padding: 1rem;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
   }
   
-  .letter-grid {
-    display: flex;
-    flex-wrap: wrap;
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 60px);
+    grid-template-rows: repeat(5, 60px);
+    gap: 10px;
     justify-content: center;
-    margin: 1rem 0;
+    margin-top: 1rem;
   }
   
-  .letter-button {
-    margin: 0.5rem;
-    padding: 1rem;
+  .cell {
+    width: 60px;
+    height: 60px;
+    background-color: #9DAE8D;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: 1.5rem;
-    cursor: pointer;
-    background-color: #e0e0ff;
-    border: 2px solid #888;
-    border-radius: 4px;
-    transition: 0.2s;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease;
   }
   
-  .letter-button:hover {
-    background-color: #c0c0ff;
+  .cell .player {
+    font-size: 1.5rem;
   }
   
-  .message {
+  .status {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+  }
+  
+  .win {
+    color: green;
     font-weight: bold;
     margin-top: 1rem;
   }
+
+  .error {
+    color: red;
+    font-weight: bold;
+    margin-top: 1rem;
+    animation: blink 0.3s step-start 5;
+  }
+  
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+  
   
