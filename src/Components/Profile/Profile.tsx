@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import "./Profile.css"
 
 const Profile = ({ user, handleLogout }: { user: any, handleLogout: () => void }) => {
   const [totalScore, setTotalScore] = useState<number>(0);

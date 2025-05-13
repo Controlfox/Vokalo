@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import "./WeeklyGlosor.css"
 
-const Glosquiz = () => {
+const WeeklyGlosor = () => {
   const [questions] = useState([
     { question: 'Apple', answer: 'äpple' },
     { question: 'Bucket', answer: 'hink' },
@@ -76,4 +77,4 @@ const Glosquiz = () => {
   );
 };
 
-export default Glosquiz;
+export default WeeklyGlosor;

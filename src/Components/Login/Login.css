@@ -1,0 +1,36 @@
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .toggle-link {
+    margin-top: 15px;
+    background: none;
+    border: none;
+    color: #6C8561;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 14px;
+  }
+  

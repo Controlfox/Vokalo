@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Register from './Register';
+import "./Login.css"
 
 const Login = ({ setCurrentUser }: { setCurrentUser: React.Dispatch<React.SetStateAction<any>> }) => {
   const [username, setUsername] = useState('');
