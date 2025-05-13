@@ -1,29 +1,52 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import bcrypt from 'bcryptjs';
 import Register from './Register';
-import "./Login.css"
+import "./Login.css";
 
 const Login = ({ setCurrentUser }: { setCurrentUser: React.Dispatch<React.SetStateAction<any>> }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false); // Lägg till state för att hantera registrering
+  const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = localStorage.getItem(username);
-    if (user) {
-      const parsedUser = JSON.parse(user);
-      if (parsedUser.password === password) {
-        localStorage.setItem('currentUser', JSON.stringify(parsedUser));
-        setCurrentUser(parsedUser); // Uppdatera tillståndet när användaren loggar in
-        navigate('/Profile');
-      } else {
-        alert('Fel lösenord');
-      }
-    } else {
+    const userData = localStorage.getItem(username);
+    if (!userData) {
       alert('Användarnamnet hittades inte');
+      return;
     }
+    const parsedUser = JSON.parse(userData) as any;
+
+    // Om vi har en hashalgoritm för lösenord
+    if (parsedUser.passwordHash) {
+      try {
+        const match = await bcrypt.compare(password, parsedUser.passwordHash);
+        if (!match) throw new Error();
+      } catch {
+        alert('Fel lösenord');
+        return;
+      }
+    } else if (parsedUser.password) {
+      // Fallback för gamla konton: jämför klartext
+      if (parsedUser.password !== password) {
+        alert('Fel lösenord');
+        return;
+      }
+      // Migrera till hashad lösenord om inloggning lyckas
+      const newHash = await bcrypt.hash(password, 10);
+      const updatedUser = { ...parsedUser, passwordHash: newHash };
+      delete updatedUser.password;
+      localStorage.setItem(username, JSON.stringify(updatedUser));
+      parsedUser.passwordHash = newHash;
+    }
+
+    // Inloggning lyckad
+    localStorage.setItem('currentUser', JSON.stringify(parsedUser));
+    setCurrentUser(parsedUser);
+    // Navigera efter roll
+    navigate(parsedUser.role === 'parent' ? '/ParentDashboard' : '/WeeklyGlosor');
   };
 
   return (
@@ -47,10 +70,8 @@ const Login = ({ setCurrentUser }: { setCurrentUser: React.Dispatch<React.SetSta
           <button type="submit">Logga in</button>
         </form>
       )}
-      
-      {/* Knapp för att växla mellan inloggning och registrering */}
-      <button onClick={() => setIsRegistering(!isRegistering)}>
-        {isRegistering ? 'Logga in' : 'Har du inget konto? Registrera'}
+      <button onClick={() => setIsRegistering(!isRegistering)} className="toggle-link">
+        {isRegistering ? 'Har du redan ett konto? Logga in' : 'Har du inget konto? Registrera'}
       </button>
     </div>
   );

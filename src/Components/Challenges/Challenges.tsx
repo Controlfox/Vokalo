@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import './Challenges.css';
 
@@ -8,13 +7,16 @@ const Challenges = () => {
       <h2>Utmaningar</h2>
       <p>Här hittar du olika spel och utmaningar!</p>
 
-      <ul className="challenge-list">
-        <li>
-          <Link to="/WordHop">🔤 Bokstavshopp – Stava ordet rätt</Link>
-        </li>
-        {/* Här kan du lägga till fler spel senare */}
-        {/* <li><Link to="/ett-annat-spel">🎯 Ett annat spel</Link></li> */}
-      </ul>
+      <div className="challenge-card-container">
+        <Link to="/WordHop" className="challenge-card">
+          <h3>🔤 Bokstavshopp</h3>
+          <p>Stava ordet genom att hoppa på rätt bokstäver!</p>
+        </Link>
+        <Link to="/ShootTheWord" className="challenge-card">
+          <h3>🎯 Skjut rätt bokstav</h3>
+          <p>Träffa rätt bokstav i rätt ordning för att stava rätt!</p>
+        </Link>
+      </div>
     </div>
   );
 };

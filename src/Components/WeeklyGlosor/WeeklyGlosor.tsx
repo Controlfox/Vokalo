@@ -1,37 +1,46 @@
 import { useState, useEffect } from 'react';
-import "./WeeklyGlosor.css"
+import "./WeeklyGlosor.css";
+
+type Glosa = {
+  id: number;
+  swedish: string;
+  english: string;
+};
 
 const WeeklyGlosor = () => {
-  const [questions] = useState([
-    { question: 'Apple', answer: 'äpple' },
-    { question: 'Bucket', answer: 'hink' },
-    { question: 'Blue', answer: 'blå' }
-  ]);
-
+  const [questions, setQuestions] = useState<Glosa[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
+  // Hämta glosor från backend
+  useEffect(() => {
+    fetch('http://localhost:3001/glosor')
+      .then(res => res.json())
+      .then(data => setQuestions(data))
+      .catch(err => console.error('Fel vid hämtning av glosor:', err));
+  }, []);
+
   // Hämta sparade poäng från localStorage vid komponentens laddning
   useEffect(() => {
     const savedScore = localStorage.getItem('currentQuizScore');
     if (savedScore) {
-      setScore(Number(savedScore)); // Sätt den sparade poängen
+      setScore(Number(savedScore));
     }
   }, []);
 
   // Spara poäng i localStorage när quizet är avslutat
   useEffect(() => {
     if (quizFinished) {
-      // Spara varje quizpoäng med ett unikt nyckelnamn
       const quizId = `quizScore_${new Date().getTime()}`;
       localStorage.setItem(quizId, score.toString());
     }
   }, [quizFinished, score]);
 
   const handleAnswer = () => {
-    if (userAnswer.trim().toLowerCase() === questions[currentQuestionIndex].answer.toLowerCase()) {
+    const correctAnswer = questions[currentQuestionIndex].english;
+    if (userAnswer.trim().toLowerCase() === correctAnswer.toLowerCase()) {
       setScore(prevScore => prevScore + 1);
     }
 
@@ -48,15 +57,18 @@ const WeeklyGlosor = () => {
     setCurrentQuestionIndex(0);
     setUserAnswer('');
     setQuizFinished(false);
-    localStorage.removeItem('currentQuizScore'); // Ta bort sparad poäng från localStorage
+    localStorage.removeItem('currentQuizScore');
   };
+
+  if (questions.length === 0) return <p>Laddar glosor...</p>;
 
   return (
     <div className="glosquiz">
       <h2>Glosquiz</h2>
       {!quizFinished ? (
         <>
-          <h3>{questions[currentQuestionIndex].question}</h3>
+          <p><strong>Översätt detta ord till engelska:</strong></p>
+          <h3>{questions[currentQuestionIndex].swedish}</h3>
           <input
             type="text"
             value={userAnswer}
