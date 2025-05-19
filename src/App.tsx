@@ -8,6 +8,7 @@ import WordHop from './Components/WordHop/WordHop';
 import Challenges from './Components/Challenges/Challenges';
 import ShootTheWord from './Components/ShootTheWord/ShootTheWord';
 import ParentDashboard from './Components/ParentDashboard/ParentDashboard';
+import ManageGlosor from './Components/ManageGlosor/ManageGlosor';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -44,8 +45,11 @@ function App() {
                   </>
                 )}
                 {isParent && (
-                  <li><NavLink to="/ParentDashboard" className={({ isActive }) => isActive ? 'active' : ''}>🧑‍💼 Föräldravy</NavLink></li>
-                    //LÄGG TILL GLOSOR
+                  <>
+                    <li><NavLink to="/ParentDashboard" className={({ isActive }) => isActive ? 'active' : ''}>🧑‍💼 Föräldravy</NavLink></li>
+                    <li><NavLink to="/ManageGlosor" className={({isActive})=>isActive?'active':''}>📋 Hantera glosor</NavLink></li>
+                  </>
+
                 )}
                 
                 <li><NavLink to="/Profile" className={({ isActive }) => isActive ? 'active' : ''}>👤 Profil</NavLink></li>
@@ -63,7 +67,12 @@ function App() {
                   <Route path="/ShootTheWord" element={<ShootTheWord />} />
                 </>
               )}
-              {isParent && <Route path="/ParentDashboard" element={<ParentDashboard />} />}
+              {isParent && (
+                <>
+                  <Route path="/ParentDashboard" element={<ParentDashboard />} />
+                  <Route path="/ManageGlosor" element={<ManageGlosor />} />
+                </>
+              )}
               <Route path="/Profile" element={<Profile user={currentUser} handleLogout={handleLogout} />} />
               <Route path="/Login" element={<Navigate to="/" />} />
               

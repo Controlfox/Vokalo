@@ -3,75 +3,82 @@ import { useNavigate } from 'react-router-dom';
 import bcrypt from 'bcryptjs';
 import Register from './Register';
 import "./Login.css";
+import { User } from '../../Types';
 
-const Login = ({ setCurrentUser }: { setCurrentUser: React.Dispatch<React.SetStateAction<any>> }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+const API = 'http://localhost:3001';
+
+interface LoginProps {
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
+}
+
+const Login: React.FC<LoginProps> = ({ setCurrentUser }) => {
+  const [username, setUsername]     = useState('');
+  const [password, setPassword]     = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const userData = localStorage.getItem(username);
-    if (!userData) {
+
+    //Hämta användaren från backend
+    const res = await fetch(`${API}/users?username=${encodeURIComponent(username)}`);
+    const users = await res.json();
+    if (!users.length) {
       alert('Användarnamnet hittades inte');
       return;
     }
-    const parsedUser = JSON.parse(userData) as any;
+    const user = users[0] as User;
 
-    // Om vi har en hashalgoritm för lösenord
-    if (parsedUser.passwordHash) {
-      try {
-        const match = await bcrypt.compare(password, parsedUser.passwordHash);
-        if (!match) throw new Error();
-      } catch {
-        alert('Fel lösenord');
-        return;
-      }
-    } else if (parsedUser.password) {
-      // Fallback för gamla konton: jämför klartext
-      if (parsedUser.password !== password) {
-        alert('Fel lösenord');
-        return;
-      }
-      // Migrera till hashad lösenord om inloggning lyckas
-      const newHash = await bcrypt.hash(password, 10);
-      const updatedUser = { ...parsedUser, passwordHash: newHash };
-      delete updatedUser.password;
-      localStorage.setItem(username, JSON.stringify(updatedUser));
-      parsedUser.passwordHash = newHash;
+    //Jämför hash
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) {
+      alert('Fel lösenord');
+      return;
     }
 
-    // Inloggning lyckad
-    localStorage.setItem('currentUser', JSON.stringify(parsedUser));
-    setCurrentUser(parsedUser);
-    // Navigera efter roll
-    navigate(parsedUser.role === 'parent' ? '/ParentDashboard' : '/WeeklyGlosor');
+    //Inloggning lyckad — spara i localStorage och context
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    setCurrentUser(user);
+
+    //Navigera baserat på roll
+    if (user.role === 'parent') {
+      navigate('/ManageGlosor');
+    } else {
+      navigate('/WeeklyGlosor');
+    }
   };
 
   return (
     <div className="login-container">
       {isRegistering ? (
-        <Register />
+        <Register onRegistered={() => setIsRegistering(false)} />
       ) : (
         <form onSubmit={handleLogin}>
           <input
             type="text"
             placeholder="Användarnamn"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={e => setUsername(e.target.value)}
+            required
           />
           <input
             type="password"
             placeholder="Lösenord"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
+            required
           />
           <button type="submit">Logga in</button>
         </form>
       )}
-      <button onClick={() => setIsRegistering(!isRegistering)} className="toggle-link">
-        {isRegistering ? 'Har du redan ett konto? Logga in' : 'Har du inget konto? Registrera'}
+      <button
+        className="toggle-link"
+        onClick={() => setIsRegistering(!isRegistering)}
+      >
+        {isRegistering 
+          ? 'Har du redan ett konto? Logga in'
+          : 'Har du inget konto? Registrera'
+        }
       </button>
     </div>
   );

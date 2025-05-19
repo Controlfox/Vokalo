@@ -1,87 +1,123 @@
 import React, { useState, useEffect } from 'react';
+import bcrypt from 'bcryptjs';
 import './ParentDashboard.css';
 
-interface Glosa { swedish: string; english: string; }
-interface User { username: string; password: string; role: 'parent' | 'child'; children: string[]; }
+interface User {
+  id: number;
+  username: string;
+  passwordHash: string;
+  role: 'parent' | 'child';
+  parent?: string;       // bara för barn
+  children?: string[];   // bara för föräldrar
+}
 
-const ParentDashboard = () => {
-  const [parent, setParent] = useState<User | null>(null);
+interface Glosa { swedish: string; english: string; }
+
+const API = 'http://localhost:3001';
+
+const ParentDashboard: React.FC = () => {
+  const stored = localStorage.getItem('currentUser');
+  const initialParent: User | null = stored
+    ? JSON.parse(stored)
+    : null;
+
+  const [parent, setParent]       = useState<User | null>(initialParent);
   const [childName, setChildName] = useState('');
   const [childPass, setChildPass] = useState('');
-  const [glosorSw, setGlosorSw] = useState('');
-  const [glosorEn, setGlosorEn] = useState('');
-  const [selectedChild, setSelectedChild] = useState('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage]     = useState('');
 
+  // Läs in full parent från API (för att få uppdaterat children-array)
   useEffect(() => {
-    const stored = localStorage.getItem('currentUser');
-    if (stored) {
-      const u: User = JSON.parse(stored);
-      setParent(u);
-      if (u.children.length > 0) setSelectedChild(u.children[0]);
-    }
-  }, []);
-
-  const updateParentStore = (updated: User) => {
-    localStorage.setItem(parent!.username, JSON.stringify(updated));
-    localStorage.setItem('currentUser', JSON.stringify(updated));
-    setParent(updated);
-  };
-
-  const handleAddChild = (e: React.FormEvent) => {
-    e.preventDefault();
     if (!parent) return;
-    if (childName && childPass) {
-      // create child user
-      const newChild: User = { username: childName, password: childPass, role: 'child', children: [] };
-      localStorage.setItem(childName, JSON.stringify(newChild));
-      // update parent
-      const updated = { ...parent, children: [...parent.children, childName] };
-      updateParentStore(updated);
-      setMessage(`Barnkonto ${childName} skapat.`);
-      setChildName(''); setChildPass('');
-    }
-  };
+    fetch(`${API}/users/${parent.id}`)
+      .then(r => r.json())
+      .then((u: User) => setParent(u))
+      .catch(console.error);
+  }, [parent?.id]);
 
-  const handleAddGlosa = (e: React.FormEvent) => {
+  const handleAddChild = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedChild) return;
-    const key = `glosor_${selectedChild}`;
-    const existing = localStorage.getItem(key);
-    const arr: Glosa[] = existing ? JSON.parse(existing) : [];
-    arr.push({ swedish: glosorSw, english: glosorEn });
-    localStorage.setItem(key, JSON.stringify(arr));
-    setMessage(`Lagt till glosa för ${selectedChild}.`);
-    setGlosorSw(''); setGlosorEn('');
+    if (!parent || !childName || !childPass) return;
+
+    // 1) Skapa nytt barn‐konto (hasha lösenord först)
+    const hash = await bcrypt.hash(childPass, 10);
+    const newChild: Omit<User, 'id'> = {
+      username: childName,
+      passwordHash: hash,
+      role: 'child',
+      parent: parent.username
+    };
+
+    const resChild = await fetch(`${API}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newChild)
+    });
+    if (!resChild.ok) {
+      setMessage('Kunde inte skapa barnkontot');
+      return;
+    }
+    const createdChild: User = await resChild.json();
+
+    // 2) Uppdatera förälderns children-lista
+    const updatedChildren = [...(parent.children || []), createdChild.username];
+    const resParent = await fetch(`${API}/users/${parent.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ children: updatedChildren })
+    });
+    if (!resParent.ok) {
+      setMessage('Kunde inte länka barnet till föräldern');
+      return;
+    }
+    const updatedParent: User = await resParent.json();
+
+    // 3) Spara lokalt
+    setParent(updatedParent);
+    localStorage.setItem('currentUser', JSON.stringify(updatedParent));
+
+    setMessage(`Barnkonto ${createdChild.username} skapat och kopplat!`);
+    setChildName('');
+    setChildPass('');
   };
 
-  if (!parent) return <p>Laddar...</p>;
+  if (!parent) return <p>Laddar …</p>;
 
   return (
     <div className="parent-dashboard">
       <h2>Föräldravy</h2>
+
       <section className="section">
         <h3>Skapa barnkonto</h3>
         <form onSubmit={handleAddChild} className="form">
-          <input value={childName} onChange={e => setChildName(e.target.value)} placeholder="Barnens användarnamn" />
-          <input type="password" value={childPass} onChange={e => setChildPass(e.target.value)} placeholder="Lösenord" />
+          <input
+            type="text"
+            placeholder="Barnens användarnamn"
+            value={childName}
+            onChange={e => setChildName(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Lösenord"
+            value={childPass}
+            onChange={e => setChildPass(e.target.value)}
+            required
+          />
           <button type="submit">Skapa barn</button>
         </form>
       </section>
 
-      <section className="section">
-        <h3>Lägg till veckans glosor</h3>
-        <form onSubmit={handleAddGlosa} className="form">
-          <select value={selectedChild} onChange={e => setSelectedChild(e.target.value)}>
-            {parent.children.map(child => <option key={child} value={child}>{child}</option>)}
-          </select>
-          <input value={glosorSw} onChange={e => setGlosorSw(e.target.value)} placeholder="Svensk" />
-          <input value={glosorEn} onChange={e => setGlosorEn(e.target.value)} placeholder="Engelsk" />
-          <button type="submit">Lägg till glosa</button>
-        </form>
-      </section>
-
       {message && <p className="message">{message}</p>}
+
+      <section className="section">
+        <h3>Dina barn</h3>
+        <ul>
+          {parent.children?.map(c => (
+            <li key={c}>{c}</li>
+          )) || <li>Inga barn kopplade ännu</li>}
+        </ul>
+      </section>
     </div>
   );
 };

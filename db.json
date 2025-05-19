@@ -1,8 +1,49 @@
 {
-    "glosor": [
-      { "id": 1, "swedish": "hund", "english": "dog" },
-      { "id": 2, "swedish": "katt", "english": "cat" },
-      { "id": 3, "swedish": "blå", "english": "blue" }
-    ]
-  }
-  
+  "users": [
+    {
+      "id": "8d9a",
+      "username": "thlm",
+      "passwordHash": "$2b$10$qtFEEY4um0ReeLKNCE0zxegBQI6tlHKylZNMSh6LzaXHiStpdCPj.",
+      "role": "parent",
+      "children": [
+        "barn123",
+        "ettbarntill",
+        "barn"
+      ]
+    },
+    {
+      "id": "6dff",
+      "username": "barn123",
+      "passwordHash": "$2b$10$Ey9CkvD5l7X2IvffLsL/RueHboBfvxGvQU4GIeeN/7UoCMuztBBQW",
+      "role": "child",
+      "parent": "thlm"
+    },
+    {
+      "id": "ef94",
+      "username": "ettbarntill",
+      "passwordHash": "$2b$10$eBsRxybyKM5Q8pZAv2LDS.cFNjNeG2PdH1ir00.QxXSG/IFwmcgfy",
+      "role": "child",
+      "parent": "thlm"
+    },
+    {
+      "id": "b008",
+      "username": "barn",
+      "passwordHash": "$2b$10$50DMhrtRS5Ac4QCkiE4qg.4RD6lt8.h0slaR7qe.j4eIhg3l/I4xa",
+      "role": "child",
+      "parent": "thlm"
+    }
+  ],
+  "glosor": [
+    {
+      "id": 1,
+      "swedish": "hund",
+      "english": "dog"
+    },
+    {
+      "id": "2157",
+      "swedish": "blå",
+      "english": "blue",
+      "child": "barn"
+    }
+  ]
+}
