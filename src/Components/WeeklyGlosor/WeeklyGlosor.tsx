@@ -7,7 +7,12 @@ type Glosa = {
   english: string;
 };
 
+const API = 'http://localhost:5287';
+
 const WeeklyGlosor = () => {
+  const stored = localStorage.getItem('currentUser');
+  const user = stored ? JSON.parse(stored) : null;
+
   const [questions, setQuestions] = useState<Glosa[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -16,11 +21,21 @@ const WeeklyGlosor = () => {
 
   // Hämta glosor från backend
   useEffect(() => {
-    fetch('http://localhost:3001/glosor')
+    if (!user?.username) return;
+    const token = localStorage.getItem('token');
+    fetch(`${API}/glosor?child=${user.username}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
       .then(res => res.json())
-      .then(data => setQuestions(data))
+      .then(data => setQuestions(
+        data.map((g: any) => ({
+          id: g.id,
+          swedish: g.swedish ?? g.Swedish,
+          english: g.english ?? g.English
+        }))
+      ))
       .catch(err => console.error('Fel vid hämtning av glosor:', err));
-  }, []);
+  }, [user?.username]);
 
   // Hämta sparade poäng från localStorage vid komponentens laddning
   useEffect(() => {

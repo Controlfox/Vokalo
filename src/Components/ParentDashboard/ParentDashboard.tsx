@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import bcrypt from 'bcryptjs';
 import './ParentDashboard.css';
 
 interface User {
@@ -13,7 +12,7 @@ interface User {
 
 interface Glosa { swedish: string; english: string; }
 
-const API = 'http://localhost:3001';
+const API = 'http://localhost:5287';
 
 const ParentDashboard: React.FC = () => {
   const stored = localStorage.getItem('currentUser');
@@ -38,27 +37,27 @@ const ParentDashboard: React.FC = () => {
   const handleAddChild = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!parent || !childName || !childPass) return;
-
-    // 1) Skapa nytt barn‐konto (hasha lösenord först)
-    const hash = await bcrypt.hash(childPass, 10);
-    const newChild: Omit<User, 'id'> = {
+  
+    // Skicka plaintext-lösenord till backend!
+    const newChild = {
       username: childName,
-      passwordHash: hash,
+      password: childPass,  // NYCKELN: skicka "password" (inte "passwordHash")
       role: 'child',
       parent: parent.username
     };
-
+  
     const resChild = await fetch(`${API}/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newChild)
     });
+  
     if (!resChild.ok) {
       setMessage('Kunde inte skapa barnkontot');
       return;
     }
     const createdChild: User = await resChild.json();
-
+  
     // 2) Uppdatera förälderns children-lista
     const updatedChildren = [...(parent.children || []), createdChild.username];
     const resParent = await fetch(`${API}/users/${parent.id}`, {
@@ -71,15 +70,16 @@ const ParentDashboard: React.FC = () => {
       return;
     }
     const updatedParent: User = await resParent.json();
-
+  
     // 3) Spara lokalt
     setParent(updatedParent);
     localStorage.setItem('currentUser', JSON.stringify(updatedParent));
-
+  
     setMessage(`Barnkonto ${createdChild.username} skapat och kopplat!`);
     setChildName('');
     setChildPass('');
   };
+  
 
   if (!parent) return <p>Laddar …</p>;
 

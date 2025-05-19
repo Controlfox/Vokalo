@@ -9,7 +9,7 @@ interface GlosaRecord {
     child: string;
 }
 
-const API = 'http://localhost:3001';
+const API = 'http://localhost:5287';
 
 const ManageGlosor: React.FC = () => {
     const stored = localStorage.getItem('currentUser');
@@ -21,10 +21,10 @@ const ManageGlosor: React.FC = () => {
     const [newSwedish, setNewSwedish] = useState('');
     const [newEnglish, setNewEnglish] = useState('');
 
-    // Hämta barn från backend
+    // 1. Hämta barn från backend
     useEffect(() => {
         if (!parent.username) return;
-        fetch(`${API}/users?role=child&parent=${parent.username}`)
+        fetch(`${API}/users/children/${parent.username}`)
             .then(res => res.json())
             .then((kids: User[]) => {
                 setChildren(kids);
@@ -33,7 +33,7 @@ const ManageGlosor: React.FC = () => {
             .catch(err => console.error('Hämtning av barn misslyckades', err));
     }, [parent.username]);
 
-    // Hämta glosor för valt barn
+    // 2. Hämta glosor för valt barn
     useEffect(() => {
         if (!selectedChild) return;
         fetch(`${API}/glosor?child=${selectedChild}`)
@@ -42,7 +42,7 @@ const ManageGlosor: React.FC = () => {
             .catch(err => console.error('Hämtning av glosor misslyckades', err));
     }, [selectedChild]);
 
-    // Lägg till ny glosa
+    // 3. Lägg till ny glosa
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
         const record = { swedish: newSwedish, english: newEnglish, child: selectedChild };
@@ -60,7 +60,7 @@ const ManageGlosor: React.FC = () => {
             .catch(err => console.error('Lägg till glosa misslyckades', err));
     };
 
-    // Uppdatera glosa
+    // 4. Uppdatera glosa
     const handleUpdate = (id: number, field: 'swedish' | 'english', value: string) => {
         const updatedList = glosor.map(g => g.id === id ? { ...g, [field]: value } : g);
         setGlosor(updatedList);
@@ -72,7 +72,7 @@ const ManageGlosor: React.FC = () => {
         }).catch(err => console.error('Uppdatering av glosa misslyckades', err));
     };
 
-    // Radera glosa
+    // 5. Radera glosa
     const handleDelete = (id: number) => {
         fetch(`${API}/glosor/${id}`, { method: 'DELETE' })
             .then(() => setGlosor(glosor.filter(g => g.id !== id)))

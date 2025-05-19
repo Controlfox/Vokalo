@@ -10,6 +10,10 @@ interface Glosa {
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const ShootTheWord = () => {
+  // 1. Läs inlogged user från localStorage
+  const stored = localStorage.getItem('currentUser');
+  const user = stored ? JSON.parse(stored) : null;
+
   const [glosor, setGlosor] = useState<Glosa[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [collected, setCollected] = useState<string[]>([]);
@@ -19,12 +23,23 @@ const ShootTheWord = () => {
   const [score, setScore] = useState(0);
   const [hitIndex, setHitIndex] = useState<number | null>(null);
 
+  // 2. Hämta barnspecifika glosor
   useEffect(() => {
-    fetch('http://localhost:3001/glosor')
+    if (!user?.username) return;
+    const token = localStorage.getItem('token');
+    fetch(`http://localhost:5287/glosor?child=${user.username}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
       .then(res => res.json())
-      .then(data => setGlosor(data));
-  }, []);
-
+      .then(data => setGlosor(
+        data.map((g: any) => ({
+          id: g.id,
+          swedish: g.swedish ?? g.Swedish,
+          english: g.english ?? g.English
+        }))
+      ));
+  }, [user?.username]);
+  
   useEffect(() => {
     if (glosor.length > 0) {
       const word = glosor[currentIndex].english.toUpperCase();
@@ -59,28 +74,28 @@ const ShootTheWord = () => {
     if (letter === next) {
       const updated = [...collected, letter];
       setCollected(updated);
-        setHitIndex(targets.findIndex(t => t.letter === letter));
-        setTargets(prev =>
-            prev.map(t =>
-                t.letter === letter && t.state === 'idle'
-                ? { ...t, state: 'hit'}
-                : t
-            )
-        );
+      setHitIndex(targets.findIndex(t => t.letter === letter));
+      setTargets(prev =>
+        prev.map(t =>
+          t.letter === letter && t.state === 'idle'
+            ? { ...t, state: 'hit'}
+            : t
+        )
+      );
 
       if (updated.join('') === word) {
         setScore(prev => prev + 1);
         localStorage.setItem(`quizScore_${Date.now()}`, '1');
         setMessage('Rätt! 🥳');
         setTimeout(() => {
-            setHitIndex(null);
-            setTargets(prev =>
-                prev.map(t =>
-                    t.letter == letter && t.state == 'hit'
-                    ? { ...t, state: 'idle'}
-                    : t
-                )
+          setHitIndex(null);
+          setTargets(prev =>
+            prev.map(t =>
+              t.letter == letter && t.state == 'hit'
+                ? { ...t, state: 'idle'}
+                : t
             )
+          )
           if (currentIndex < glosor.length - 1) {
             setCurrentIndex(currentIndex + 1);
           } else {
@@ -110,7 +125,6 @@ const ShootTheWord = () => {
             onClick={() => handleShoot(target.letter)}
             style={{ left: `${target.left}%` }}
             disabled={target.state !== 'idle'}
-            
           >
             {target.letter}
           </button>

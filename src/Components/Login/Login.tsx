@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import bcrypt from 'bcryptjs';
 import Register from './Register';
 import "./Login.css";
 import { User } from '../../Types';
 
-const API = 'http://localhost:3001';
+const API = 'http://localhost:5287';
 
 interface LoginProps {
   setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -19,34 +18,34 @@ const Login: React.FC<LoginProps> = ({ setCurrentUser }) => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    //Hämta användaren från backend
-    const res = await fetch(`${API}/users?username=${encodeURIComponent(username)}`);
-    const users = await res.json();
-    if (!users.length) {
-      alert('Användarnamnet hittades inte');
-      return;
-    }
-    const user = users[0] as User;
-
-    //Jämför hash
-    const match = await bcrypt.compare(password, user.passwordHash);
-    if (!match) {
-      alert('Fel lösenord');
-      return;
-    }
-
-    //Inloggning lyckad — spara i localStorage och context
-    localStorage.setItem('currentUser', JSON.stringify(user));
-    setCurrentUser(user);
-
-    //Navigera baserat på roll
-    if (user.role === 'parent') {
-      navigate('/ManageGlosor');
-    } else {
-      navigate('/WeeklyGlosor');
+    try {
+      const res = await fetch(`${API}/users/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }) // plaintext
+      });
+  
+      if (!res.ok) {
+        alert('Fel användarnamn eller lösenord');
+        return;
+      }
+      const data = await res.json();
+      // Spara token och användare
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      setCurrentUser(data.user);
+  
+      if (data.user.role === 'parent') {
+        navigate('/ManageGlosor');
+      } else {
+        navigate('/WeeklyGlosor');
+      }
+    } catch (error) {
+      alert('Kunde inte kontakta servern.');
     }
   };
+  
+  
 
   return (
     <div className="login-container">

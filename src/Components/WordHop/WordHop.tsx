@@ -19,14 +19,25 @@ const WordHop = () => {
   const [error, setError] = useState(false);
 
   const gridSize = 5; // 5x5 grid
-
+  const stored = localStorage.getItem('currentUser');
+  const user = stored ? JSON.parse(stored) : null;
+  
   useEffect(() => {
-    fetch('http://localhost:3001/glosor')
-      .then((res) => res.json())
-      .then((data) => {
-        setGlosor(data);
-      });
-  }, []);
+    if (!user?.username) return;
+    const token = localStorage.getItem('token');
+    fetch(`http://localhost:5287/glosor?child=${user.username}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+      .then(res => res.json())
+      .then(data => setGlosor(
+        data.map((g: any) => ({
+          id: g.id,
+          swedish: g.swedish ?? g.Swedish,
+          english: g.english ?? g.English
+        }))
+      ));
+  }, [user?.username]);
+  
 
   useEffect(() => {
     if (glosor.length > 0) {

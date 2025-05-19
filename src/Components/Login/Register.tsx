@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import bcrypt from 'bcryptjs';
 import "./Login.css";
 import { User } from '../../Types';
 
-const API = 'http://localhost:3001';
+const API = 'http://localhost:5287';
 
 interface RegisterProps {
   onRegistered: () => void;
@@ -19,54 +18,32 @@ const Register: React.FC<RegisterProps> = ({ onRegistered }) => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // 1) Lösenordsvalidering
+  
     if (password !== confirmPassword) {
       setErrorMessage('Lösenorden matchade inte!');
       return;
     }
-
-    // 2) Kontrollera om användarnamn redan finns
-    const existing = await fetch(`${API}/users?username=${encodeURIComponent(username)}`)
-      .then(r => r.json());
-    if (existing.length) {
-      setErrorMessage('Användarnamnet är upptaget!');
-      return;
-    }
-
-    // 3) Om barn, kontrollera förälder finns
-    if (role === 'child') {
-      const parentList = await fetch(`${API}/users?username=${encodeURIComponent(parentUsername)}&role=parent`)
-        .then(r => r.json());
-      if (!parentList.length) {
-        setErrorMessage('Föräldrakonto hittades inte!');
-        return;
-      }
-    }
-
-    // 4) Hasha lösenordet
-    const hash = await bcrypt.hash(password, 10);
-
-    // 5) POST mot backend
-    const newUser: User = {
-      username,
-      passwordHash: hash,
-      role,
-      ...(role === 'child' ? { parent: parentUsername } : { children: [] })
-    };
+  
     const res = await fetch(`${API}/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newUser)
+      body: JSON.stringify({
+        username,
+        password, 
+        role,
+        ...(role === 'child' ? { parent: parentUsername } : { children: [] })
+      })
     });
+  
     if (!res.ok) {
-      setErrorMessage('Något gick fel vid skapandet');
+      setErrorMessage('Kunde inte skapa användare');
       return;
     }
-
+  
     alert('Användare skapad!');
     onRegistered();
   };
+  
 
   return (
     <div className="register-container">
