@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import "./Profile.css"
+import { User } from '../../Types';
 
-const Profile = ({ user, handleLogout }: { user: any, handleLogout: () => void }) => {
+const Profile = ({ user, handleLogout }: { user: User, handleLogout: () => void }) => {
   const [totalScore, setTotalScore] = useState<number>(0);
   const navigate = useNavigate(); // För att hantera omdirigering
 
