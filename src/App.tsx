@@ -9,6 +9,7 @@ import Challenges from './Components/Challenges/Challenges';
 import ShootTheWord from './Components/ShootTheWord/ShootTheWord';
 import ParentDashboard from './Components/ParentDashboard/ParentDashboard';
 import ManageGlosor from './Components/ManageGlosor/ManageGlosor';
+import { ErrorBoundary } from './ErrorBoundary';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -57,6 +58,7 @@ function App() {
               </ul>
             </nav>
           </aside>
+          <ErrorBoundary>
           <main className="main-content">
             <Routes>
               {isChild && (
@@ -81,11 +83,14 @@ function App() {
               <p>Vokalo 2025</p>
             </footer>
           </main>
+          </ErrorBoundary>
         </div>
       ) : (
+        <ErrorBoundary>
         <Routes>
           <Route path="*" element={<Login setCurrentUser={setCurrentUser} />} />
         </Routes>
+        </ErrorBoundary>
       )}
     </Router>
   );
