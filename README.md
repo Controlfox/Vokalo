@@ -164,3 +164,4 @@ Backend: ASP.NET Core 8, Entity Framework In-Memory DB
 14. WordHopGrid
 15. WordHopStatus
 16. WordHopWordPrompt
+17. ErrorBoundary
