@@ -145,3 +145,22 @@ Kör npm run preview för att förhandsgranska produktionen lokalt.
 Frontend: React, Vite, TypeScript, CSS
 
 Backend: ASP.NET Core 8, Entity Framework In-Memory DB
+
+### Mina komponenter
+
+1. Challenges
+2. Login
+3. Register
+4. ChildSelector
+5. GlosaForm
+6. GlosaItem
+7. GlosaList
+8. ManageGlosor
+9. ParentDashboard
+10. Profile
+11. ShootTheWord
+12. WeeklyGlosor
+13. WordHop
+14. WordHopGrid
+15. WordHopStatus
+16. WordHopWordPrompt

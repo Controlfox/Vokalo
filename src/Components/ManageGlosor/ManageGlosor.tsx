@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { User } from "../../Types";
 import './ManageGlosor.css'
+import ChildSelector from "./ChildSelector";
+import GlosaForm from "./GlosaForm";
+import GlosaList from "./GlosaList";
 
 interface GlosaRecord {
     id: number;
@@ -82,47 +85,23 @@ const ManageGlosor: React.FC = () => {
     return (
         <div className="manage-container">
             <h2>Hantera veckans glosor</h2>
-            <div className="child-select">
-                <label>Välj barn:</label>
-                <select value={selectedChild} onChange={e => setSelectedChild(e.target.value)}>
-                    {children.map(c => <option key={c.username} value={c.username}>{c.username}</option>)}
-                </select>
-            </div>
-            <form onSubmit={handleAdd} className="add-form">
-                <input
-                    type="text"
-                    placeholder="Svenska"
-                    value={newSwedish}
-                    onChange={e => setNewSwedish(e.target.value)}
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Engelska"
-                    value={newEnglish}
-                    onChange={e => setNewEnglish(e.target.value)}
-                    required
-                />
-                <button type="submit">Lägg till</button>
-            </form>
-
-            <ul className="glosa-list">
-                {glosor.map(g => (
-                    <li key={g.id} className="glosa-item">
-                        <input
-                            className="edit"
-                            value={g.swedish}
-                            onChange={e => handleUpdate(g.id, "swedish", e.target.value)}
-                        />
-                        <input
-                            className="edit"
-                            value={g.english}
-                            onChange={e => handleUpdate(g.id, "english", e.target.value)}
-                        />
-                        <button className="delete" onClick={() => handleDelete(g.id)}>x</button>
-                    </li>
-                ))}
-            </ul>
+            <ChildSelector
+                childrenList={children}
+                selectedChild={selectedChild}
+                onChange={e => setSelectedChild(e.target.value)}
+            />
+            <GlosaForm
+                swedish={newSwedish}
+                english={newEnglish}
+                onSwedishChange={e => setNewSwedish(e.target.value)}
+                onEnglishChange={e => setNewEnglish(e.target.value)}
+                onSubmit={handleAdd}
+            />
+            <GlosaList
+                glosor={glosor}
+                onUpdate={handleUpdate}
+                onDelete={handleDelete}
+            />
         </div>
     );
 };
