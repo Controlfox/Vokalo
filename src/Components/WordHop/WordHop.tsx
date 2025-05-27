@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import './WordHop.css';
+import WordHopWordPrompt from './WordHopWordPrompt';
+import WordHopGrid from './WordHopGrid';
+import WordHopStatus from './WordHopStatus';
 
 interface Glosa {
   id: number;
@@ -119,25 +122,14 @@ const WordHop = () => {
   return (
     <div className="wordhop-container">
       <h2>Bokstavshopp</h2>
-      <p><strong>Stava det engelska ordet för:</strong> {glosor[currentIndex].swedish}</p>
-      <div className="grid">
-        {grid.map((letter, idx) => {
-          const x = idx % gridSize;
-          const y = Math.floor(idx / gridSize);
-          const isPlayer = position.x === x && position.y === y;
-
-          return (
-            <div key={idx} className={`cell ${isPlayer ? 'player' : ''}`}>
-              {isPlayer ? <span className="icon">🧍</span> : letter}
-            </div>
-          );
-        })}
-      </div>
-      <div className="status">
-        <p>Ditt ord: {collectedLetters.join('')}</p>
-        {error && <p className="error">Fel bokstav! Försök igen.</p>}
-        {won && <p className="win">Du stavade {glosor[currentIndex].english.toUpperCase()} rätt! 🎉</p>}
-      </div>
+      <WordHopWordPrompt swedish={glosor[currentIndex].swedish} />
+      <WordHopGrid grid={grid} gridSize={gridSize} position={position} />
+      <WordHopStatus
+        collectedLetters={collectedLetters}
+        error={error}
+        won={won}
+        correctWord={glosor[currentIndex].english}
+      />
     </div>
   );
 };
