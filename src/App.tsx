@@ -75,7 +75,7 @@ function App() {
                   <Route path="/ManageGlosor" element={<ManageGlosor />} />
                 </>
               )}
-              <Route path="/Profile" element={<Profile user={currentUser} handleLogout={handleLogout} />} />
+              <Route path="/Profile" element={<Profile />} />
               <Route path="/Login" element={<Navigate to="/" />} />
               
             </Routes>

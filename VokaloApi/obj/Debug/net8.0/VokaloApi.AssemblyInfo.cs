@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VokaloApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+842aa5eddf21780d1c7ff0004da3bb768bb295bd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b7c09f03a53988c887b40d97745bfb6de0a00a9a")]
 [assembly: System.Reflection.AssemblyProductAttribute("VokaloApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VokaloApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

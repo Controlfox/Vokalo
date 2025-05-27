@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Register from './Register';
 import "./Login.css";
 import { User } from '../../Types';
+import { useUser } from '../../Context/UserContext';
 
 const API = 'http://localhost:5287';
 
@@ -15,6 +16,9 @@ const Login: React.FC<LoginProps> = ({ setCurrentUser }) => {
   const [password, setPassword]     = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
+
+  //Hämta från context
+  const {setUser} = useUser();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +37,7 @@ const Login: React.FC<LoginProps> = ({ setCurrentUser }) => {
       // Spara token och användare
       localStorage.setItem('token', data.token);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
-      setCurrentUser(data.user);
+      setUser(data.user);
   
       if (data.user.role === 'parent') {
         navigate('/ManageGlosor');
