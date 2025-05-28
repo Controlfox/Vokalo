@@ -1,23 +1,31 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import type { User } from "../Types";
 
-// Typ för context-värdet
+// Typ för värdet i contexten: användare + funktion för att ändra den
 type UserContextType = {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 };
 
-// Skapa context med rätt typ!
-export const UserContext = createContext<UserContextType | undefined>(undefined);
+// Skapar själva contexten, default undefined
+export const UserContext = createContext<UserContextType | undefined>(
+  undefined
+);
 
-// Provider-komponent
+// Provider som kapslar in hela appen och lagrar användaren i state
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  //Ladda användaren från localstorage
+  // Ladda användaren från localStorage om den finns (vid sidladdning)
   useEffect(() => {
     const saved = localStorage.getItem("currentUser");
-    if(saved) setUser(JSON.parse(saved));
+    if (saved) setUser(JSON.parse(saved));
   }, []);
 
   return (
@@ -27,7 +35,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom hook
+// Hook för att använda contexten på ett enkelt sätt i andra komponenter
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
