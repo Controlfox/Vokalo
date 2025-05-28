@@ -4,48 +4,26 @@ import Register from './Register';
 import "./Login.css";
 import { User } from '../../Types';
 import { useUser } from '../../Context/UserContext';
+import { loginUser } from '../../apiService/users';
 
-const API = 'http://localhost:5287';
-
-interface LoginProps {
-  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
-}
-
-const Login: React.FC<LoginProps> = ({ setCurrentUser }) => {
-  const [username, setUsername]     = useState('');
-  const [password, setPassword]     = useState('');
+const Login: React.FC = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
-
-  //Hämta från context
   const {setUser} = useUser();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API}/users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }) // plaintext
-      });
-  
-      if (!res.ok) {
-        alert('Fel användarnamn eller lösenord');
-        return;
-      }
-      const data = await res.json();
-      // Spara token och användare
+      const data = await loginUser(username, password);
       localStorage.setItem('token', data.token);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
       setUser(data.user);
-  
-      if (data.user.role === 'parent') {
-        navigate('/ManageGlosor');
-      } else {
-        navigate('/WeeklyGlosor');
-      }
-    } catch (error) {
-      alert('Kunde inte kontakta servern.');
+      if(data.user.role == 'parent') navigate('/ManageGlosor');
+      else navigate('/WeeklyGlosor');
+    } catch (err: any) {
+      alert(err.message);
     }
   };
   

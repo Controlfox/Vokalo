@@ -10,28 +10,22 @@ import ShootTheWord from './Components/ShootTheWord/ShootTheWord';
 import ParentDashboard from './Components/ParentDashboard/ParentDashboard';
 import ManageGlosor from './Components/ManageGlosor/ManageGlosor';
 import { ErrorBoundary } from './ErrorBoundary';
+import { useUser } from './Context/UserContext';
 
 function App() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
-    }
-  }, []);
+  const {user, setUser} = useUser();
 
   const handleLogout = () => {
     localStorage.removeItem('currentUser');
-    setCurrentUser(null);
+    setUser(null);
   };
 
-  const isParent = currentUser?.role == 'parent';
-  const isChild = currentUser?.role == 'child';
+  const isParent = user?.role == 'parent';
+  const isChild = user?.role == 'child';
 
   return (
     <Router>
-      {currentUser ? (
+      {user ? (
         <div className="app-layout">
           <aside className="sidebar">
             <h2 className="logo">Vokalo</h2>
@@ -88,7 +82,7 @@ function App() {
       ) : (
         <ErrorBoundary>
         <Routes>
-          <Route path="*" element={<Login setCurrentUser={setCurrentUser} />} />
+            <Route path="*" element={<Login />} />
         </Routes>
         </ErrorBoundary>
       )}

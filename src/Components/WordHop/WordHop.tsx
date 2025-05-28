@@ -3,6 +3,8 @@ import './WordHop.css';
 import WordHopWordPrompt from './WordHopWordPrompt';
 import WordHopGrid from './WordHopGrid';
 import WordHopStatus from './WordHopStatus';
+import { fetchGlosor } from '../../apiService/glosor';
+import { useUser } from '../../Context/UserContext';
 
 interface Glosa {
   id: number;
@@ -20,25 +22,22 @@ const WordHop = () => {
   const [grid, setGrid] = useState<string[]>([]);
   const [won, setWon] = useState(false);
   const [error, setError] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const gridSize = 5; // 5x5 grid
-  const stored = localStorage.getItem('currentUser');
-  const user = stored ? JSON.parse(stored) : null;
+  const {user} = useUser();
   
   useEffect(() => {
     if (!user?.username) return;
-    const token = localStorage.getItem('token');
-    fetch(`http://localhost:5287/glosor?child=${user.username}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    })
-      .then(res => res.json())
+    fetchGlosor(user.username)
       .then(data => setGlosor(
         data.map((g: any) => ({
           id: g.id,
           swedish: g.swedish ?? g.Swedish,
           english: g.english ?? g.English
         }))
-      ));
+      ))
+      .catch(err => setApiError(err.message))
   }, [user?.username]);
   
 
