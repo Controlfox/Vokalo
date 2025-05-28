@@ -1,22 +1,41 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import "./Profile.css"
-import { User } from '../../Types';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Profile.css";
+import ReusableTable from "../ReusableTable";
+import { useUser } from "../../Context/UserContext";
 
-const Profile = ({ user, handleLogout }: { user: User, handleLogout: () => void }) => {
+const mockHighscores = [
+  { Namn: "Lisa", Poäng: 10 },
+  { Namn: "Anna", Poäng: 8 },
+  { Namn: "Kalle", Poäng: 7 },
+];
+
+const columns = ["Namn", "Poäng"];
+
+const Profile = () => {
   const [totalScore, setTotalScore] = useState<number>(0);
-  const navigate = useNavigate(); // För att hantera omdirigering
+  const { user, setUser } = useUser();
+  const navigate = useNavigate();
 
   // Hämta alla quizpoäng från localStorage och summera dem
   useEffect(() => {
-    const allScores = Object.keys(localStorage).filter(key => key.startsWith('quizScore_'));
-    const total = allScores.reduce((acc, key) => acc + parseInt(localStorage.getItem(key) || '0', 10), 0);
+    const allScores = Object.keys(localStorage).filter((key) =>
+      key.startsWith("quizScore_")
+    );
+    const total = allScores.reduce(
+      (acc, key) => acc + parseInt(localStorage.getItem(key) || "0", 10),
+      0
+    );
     setTotalScore(total);
   }, []);
 
+  /**
+   * Loggar ut användaren och går till login-sidan.
+   */
   const handleLogoutAndRedirect = () => {
-    handleLogout(); // Ta bort användardata från localStorage
-    navigate('/Login'); // Omdirigera till inloggningssidan
+    setUser(null); // Ta bort användardata från localStorage
+    localStorage.removeItem("currentUser");
+    navigate("/Login"); // Omdirigera till inloggningssidan
   };
 
   return (
@@ -25,6 +44,8 @@ const Profile = ({ user, handleLogout }: { user: User, handleLogout: () => void 
         <div>
           <h2>Välkommen, {user.username}!</h2>
           <p>Totala poäng: {totalScore}</p>
+          <p>Highscore</p>
+          <ReusableTable columns={columns} data={mockHighscores} />
           <button onClick={handleLogoutAndRedirect}>Logga ut</button>
         </div>
       ) : (

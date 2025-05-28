@@ -1,13 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import './WordHop.css';
+import { useEffect, useState } from "react";
+import "./WordHop.css";
+import WordHopWordPrompt from "./WordHopWordPrompt";
+import WordHopGrid from "./WordHopGrid";
+import WordHopStatus from "./WordHopStatus";
+import { fetchGlosor } from "../../apiService/glosor";
+import { useUser } from "../../Context/UserContext";
 
+/**
+ * Komponent för "Bokstavshopp"-spel.
+ * Användaren styr en figur över ett rutnät med bokstäver och måste samla in rätt bokstäver i ordning.
+ */
 interface Glosa {
   id: number;
   swedish: string;
   english: string;
 }
 
-const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 const WordHop = () => {
   const [glosor, setGlosor] = useState<Glosa[]>([]);
@@ -17,28 +26,28 @@ const WordHop = () => {
   const [grid, setGrid] = useState<string[]>([]);
   const [won, setWon] = useState(false);
   const [error, setError] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const gridSize = 5; // 5x5 grid
-  const stored = localStorage.getItem('currentUser');
-  const user = stored ? JSON.parse(stored) : null;
-  
+  const { user } = useUser();
+
+  // Hämta glosor för användaren
   useEffect(() => {
     if (!user?.username) return;
-    const token = localStorage.getItem('token');
-    fetch(`http://localhost:5287/glosor?child=${user.username}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    })
-      .then(res => res.json())
-      .then(data => setGlosor(
-        data.map((g: any) => ({
-          id: g.id,
-          swedish: g.swedish ?? g.Swedish,
-          english: g.english ?? g.English
-        }))
-      ));
+    fetchGlosor(user.username)
+      .then((data) =>
+        setGlosor(
+          data.map((g: any) => ({
+            id: g.id,
+            swedish: g.swedish ?? g.Swedish,
+            english: g.english ?? g.English,
+          }))
+        )
+      )
+      .catch((err) => setApiError(err.message));
   }, [user?.username]);
-  
 
+  // Skapa nytt rutnät när nytt ord laddas
   useEffect(() => {
     if (glosor.length > 0) {
       const word = glosor[currentIndex].english.toUpperCase();
@@ -51,25 +60,28 @@ const WordHop = () => {
     }
   }, [glosor, currentIndex]);
 
+  // Hantera tangenttryckningar för att styra spelaren och samla bokstäver
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (won || error) return;
 
       setPosition((prev) => {
         const next = { ...prev };
-        if (e.key === 'ArrowUp' && prev.y > 0) next.y--;
-        if (e.key === 'ArrowDown' && prev.y < gridSize - 1) next.y++;
-        if (e.key === 'ArrowLeft' && prev.x > 0) next.x--;
-        if (e.key === 'ArrowRight' && prev.x < gridSize - 1) next.x++;
+        if (e.key === "ArrowUp" && prev.y > 0) next.y--;
+        if (e.key === "ArrowDown" && prev.y < gridSize - 1) next.y++;
+        if (e.key === "ArrowLeft" && prev.x > 0) next.x--;
+        if (e.key === "ArrowRight" && prev.x < gridSize - 1) next.x++;
         return next;
       });
 
-      if (e.key === ' ') {
+      if (e.key === " ") {
         const index = position.y * gridSize + position.x;
         const letter = grid[index];
-        const nextLetter = glosor[currentIndex].english.toUpperCase()[collectedLetters.length];
+        const nextLetter =
+          glosor[currentIndex].english.toUpperCase()[collectedLetters.length];
 
         if (letter !== nextLetter) {
+          // Fel bokstav – visa fel och återställ
           setError(true);
           setTimeout(() => {
             const word = glosor[currentIndex].english.toUpperCase();
@@ -82,32 +94,42 @@ const WordHop = () => {
           return;
         }
 
+        // Rätt bokstav – lägg till
         const updated = [...collectedLetters, letter];
         setCollectedLetters(updated);
 
-        if (updated.join('') === glosor[currentIndex].english.toUpperCase()) {
+        // Om hela ordet klart – spara poäng och gå vidare
+        if (updated.join("") === glosor[currentIndex].english.toUpperCase()) {
           setWon(true);
-          localStorage.setItem(`quizScore_${Date.now()}`, '1');
+          localStorage.setItem(`quizScore_${Date.now()}`, "1");
           setTimeout(() => {
             if (currentIndex < glosor.length - 1) {
               setCurrentIndex(currentIndex + 1);
             } else {
-              alert('Grattis! Du har klarat alla ord!');
+              alert("Grattis! Du har klarat alla ord!");
             }
           }, 1500);
         }
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [position, grid, collectedLetters, glosor, currentIndex, won, error]);
 
+  /**
+   * Skapar ett rutnät där rätt ord ingår men resterande fylls ut med slumpmässiga bokstäver.
+   * @param correctWord Ordet som ska finnas i rutnätet
+   */
   const getRandomGrid = (correctWord: string) => {
     const mixedLetters = [...correctWord];
     while (mixedLetters.length < gridSize * gridSize) {
       const letter = alphabet[Math.floor(Math.random() * alphabet.length)];
-      if (!mixedLetters.includes(letter) || mixedLetters.filter(l => l === letter).length < 2) {
+      // Lägg till bokstav max 2 gånger
+      if (
+        !mixedLetters.includes(letter) ||
+        mixedLetters.filter((l) => l === letter).length < 2
+      ) {
         mixedLetters.push(letter);
       }
     }
@@ -119,25 +141,14 @@ const WordHop = () => {
   return (
     <div className="wordhop-container">
       <h2>Bokstavshopp</h2>
-      <p><strong>Stava det engelska ordet för:</strong> {glosor[currentIndex].swedish}</p>
-      <div className="grid">
-        {grid.map((letter, idx) => {
-          const x = idx % gridSize;
-          const y = Math.floor(idx / gridSize);
-          const isPlayer = position.x === x && position.y === y;
-
-          return (
-            <div key={idx} className={`cell ${isPlayer ? 'player' : ''}`}>
-              {isPlayer ? <span className="icon">🧍</span> : letter}
-            </div>
-          );
-        })}
-      </div>
-      <div className="status">
-        <p>Ditt ord: {collectedLetters.join('')}</p>
-        {error && <p className="error">Fel bokstav! Försök igen.</p>}
-        {won && <p className="win">Du stavade {glosor[currentIndex].english.toUpperCase()} rätt! 🎉</p>}
-      </div>
+      <WordHopWordPrompt swedish={glosor[currentIndex].swedish} />
+      <WordHopGrid grid={grid} gridSize={gridSize} position={position} />
+      <WordHopStatus
+        collectedLetters={collectedLetters}
+        error={error}
+        won={won}
+        correctWord={glosor[currentIndex].english}
+      />
     </div>
   );
 };

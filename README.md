@@ -145,3 +145,64 @@ Kör npm run preview för att förhandsgranska produktionen lokalt.
 Frontend: React, Vite, TypeScript, CSS
 
 Backend: ASP.NET Core 8, Entity Framework In-Memory DB
+
+### Mina komponenter
+
+1. Challenges
+2. Login
+3. Register
+4. ChildSelector
+5. GlosaForm
+6. GlosaItem
+7. GlosaList
+8. ManageGlosor
+9. ParentDashboard
+10. Profile
+11. ShootTheWord
+12. WeeklyGlosor
+13. WordHop
+14. WordHopGrid
+15. WordHopStatus
+16. WordHopWordPrompt
+17. ErrorBoundary
+18. ReusableTable
+
+
+### ReusableTable – Generisk tabellkomponent
+
+ReusableTable är en återanvändbar komponent för att visa data i tabellform. Du skickar in namn på kolumner och en lista med objekt.
+
+#### Props
+
+- `columns` (`string[]`) – Namn på kolumner (måste matcha keys i objekten).
+- `data` (`object[]`) – Array av rader, där varje objekt har samma keys som `columns`.
+
+#### Exempel på användning
+
+import ReusableTable from "./components/ReusableTable";
+
+const columns = ["Namn", "Poäng"];
+const data = [
+  { Namn: "Lisa", Poäng: 5 },
+  { Namn: "Anna", Poäng: 7 }
+];
+
+<ReusableTable columns={columns} data={data} />
+
+### Alla endpoints
+
+GET - /glosor
+POST - /glosor
+PUT - /glosor/{id}
+DELETE - /glosor/{id}
+
+GET - /users
+GET - /users/byname?username={username}
+GET - /users/children/{parentUsername}
+GET - /users/{id}
+POST - /users
+POST - /users/login
+PATCH - /users/{id}
+
+Alla anrop till API görs i apiService/*.ts och komponenterna hanterar fel genom att visa meddelanden till användaren.
+ErrorBoundary fångar oväntade render-fel.

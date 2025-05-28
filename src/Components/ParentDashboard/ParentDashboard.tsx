@@ -1,85 +1,67 @@
-import React, { useState, useEffect } from 'react';
-import './ParentDashboard.css';
+import React, { useState, useEffect } from "react";
+import "./ParentDashboard.css";
+import { fetchUserById, patchUser, registerUser } from "../../apiService/users";
+import ReusableTable from "../ReusableTable";
+import { User } from "../../Types";
+import { useUser } from "../../Context/UserContext";
 
-interface User {
-  id: number;
-  username: string;
-  passwordHash: string;
-  role: 'parent' | 'child';
-  parent?: string;       // bara för barn
-  children?: string[];   // bara för föräldrar
-}
-
-interface Glosa { swedish: string; english: string; }
-
-const API = 'http://localhost:5287';
-
+/**
+ * Komponent för föräldravy: visar barn, hanterar att skapa barnkonto och koppla till förälder.
+ */
 const ParentDashboard: React.FC = () => {
-  const stored = localStorage.getItem('currentUser');
-  const initialParent: User | null = stored
-    ? JSON.parse(stored)
-    : null;
+  const { user, setUser } = useUser();
+  const [parent, setParent] = useState<User | null>(user);
+  const [childName, setChildName] = useState("");
+  const [childPass, setChildPass] = useState("");
+  const [message, setMessage] = useState("");
 
-  const [parent, setParent]       = useState<User | null>(initialParent);
-  const [childName, setChildName] = useState('');
-  const [childPass, setChildPass] = useState('');
-  const [message, setMessage]     = useState('');
-
-  // Läs in full parent från API (för att få uppdaterat children-array)
+  // Hämta aktuell användare från API för att få uppdaterad info om barn etc.
   useEffect(() => {
-    if (!parent) return;
-    fetch(`${API}/users/${parent.id}`)
-      .then(r => r.json())
-      .then((u: User) => setParent(u))
-      .catch(console.error);
-  }, [parent?.id]);
+    if (!user) return;
+    fetchUserById(user.id)
+      .then((u: User) => {
+        setParent(u);
+        setUser(u); // Uppdatera Context
+      })
+      .catch((err) => setMessage(err.message));
+  }, [user, setUser]);
 
+  /**
+   * Hanterar att skapa och koppla barnkonto till föräldern
+   */
   const handleAddChild = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!parent || !childName || !childPass) return;
-  
-    // Skicka plaintext-lösenord till backend!
-    const newChild = {
-      username: childName,
-      password: childPass,  // NYCKELN: skicka "password" (inte "passwordHash")
-      role: 'child',
-      parent: parent.username
-    };
-  
-    const resChild = await fetch(`${API}/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newChild)
-    });
-  
-    if (!resChild.ok) {
-      setMessage('Kunde inte skapa barnkontot');
-      return;
+
+    try {
+      //Skapa barnkonto
+      const createdChild: User = await registerUser({
+        username: childName,
+        password: childPass,
+        role: "child",
+        parent: parent.username,
+      });
+
+      // Uppdatera förälderns children-lista
+      const updatedChildren = [
+        ...(parent.children || []),
+        createdChild.username,
+      ];
+      const updatedParent: User = await patchUser(parent.id, {
+        children: updatedChildren,
+      });
+
+      // Spara både lokalt och i context
+      setParent(updatedParent);
+      localStorage.setItem("currentUser", JSON.stringify(updatedParent));
+
+      setMessage(`Barnkonto ${createdChild.username} skapat och kopplat!`);
+      setChildName("");
+      setChildPass("");
+    } catch (err: any) {
+      setMessage(err.message || "Något gick fel");
     }
-    const createdChild: User = await resChild.json();
-  
-    // 2) Uppdatera förälderns children-lista
-    const updatedChildren = [...(parent.children || []), createdChild.username];
-    const resParent = await fetch(`${API}/users/${parent.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ children: updatedChildren })
-    });
-    if (!resParent.ok) {
-      setMessage('Kunde inte länka barnet till föräldern');
-      return;
-    }
-    const updatedParent: User = await resParent.json();
-  
-    // 3) Spara lokalt
-    setParent(updatedParent);
-    localStorage.setItem('currentUser', JSON.stringify(updatedParent));
-  
-    setMessage(`Barnkonto ${createdChild.username} skapat och kopplat!`);
-    setChildName('');
-    setChildPass('');
   };
-  
 
   if (!parent) return <p>Laddar …</p>;
 
@@ -94,14 +76,14 @@ const ParentDashboard: React.FC = () => {
             type="text"
             placeholder="Barnens användarnamn"
             value={childName}
-            onChange={e => setChildName(e.target.value)}
+            onChange={(e) => setChildName(e.target.value)}
             required
           />
           <input
             type="password"
             placeholder="Lösenord"
             value={childPass}
-            onChange={e => setChildPass(e.target.value)}
+            onChange={(e) => setChildPass(e.target.value)}
             required
           />
           <button type="submit">Skapa barn</button>
@@ -111,12 +93,14 @@ const ParentDashboard: React.FC = () => {
       {message && <p className="message">{message}</p>}
 
       <section className="section">
-        <h3>Dina barn</h3>
-        <ul>
-          {parent.children?.map(c => (
-            <li key={c}>{c}</li>
-          )) || <li>Inga barn kopplade ännu</li>}
-        </ul>
+        {parent.children && parent.children.length > 0 ? (
+          <ReusableTable
+            columns={["Barn"]}
+            data={parent.children.map((name) => ({ Barn: name }))}
+          />
+        ) : (
+          <p>Inga barn kopplade ännu</p>
+        )}
       </section>
     </div>
   );
