@@ -203,3 +203,6 @@ GET - /users/{id}
 POST - /users
 POST - /users/login
 PATCH - /users/{id}
+
+Alla anrop till API görs i apiService/*.ts och komponenterna hanterar fel genom att visa meddelanden till användaren.
+ErrorBoundary fångar oväntade render-fel.

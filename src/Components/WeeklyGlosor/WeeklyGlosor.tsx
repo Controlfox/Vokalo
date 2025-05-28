@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import "./WeeklyGlosor.css";
+import { fetchGlosor } from '../../apiService/glosor';
+import { useUser } from '../../Context/UserContext';
 
 type Glosa = {
   id: number;
@@ -7,12 +9,8 @@ type Glosa = {
   english: string;
 };
 
-const API = 'http://localhost:5287';
-
 const WeeklyGlosor = () => {
-  const stored = localStorage.getItem('currentUser');
-  const user = stored ? JSON.parse(stored) : null;
-
+  const {user} = useUser();
   const [questions, setQuestions] = useState<Glosa[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -22,11 +20,7 @@ const WeeklyGlosor = () => {
   // Hämta glosor från backend
   useEffect(() => {
     if (!user?.username) return;
-    const token = localStorage.getItem('token');
-    fetch(`${API}/glosor?child=${user.username}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    })
-      .then(res => res.json())
+    fetchGlosor(user.username)
       .then(data => setQuestions(
         data.map((g: any) => ({
           id: g.id,
@@ -34,7 +28,7 @@ const WeeklyGlosor = () => {
           english: g.english ?? g.English
         }))
       ))
-      .catch(err => console.error('Fel vid hämtning av glosor:', err));
+      .catch(err => alert(err.message));
   }, [user?.username]);
 
   // Hämta sparade poäng från localStorage vid komponentens laddning

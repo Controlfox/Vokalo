@@ -16,7 +16,7 @@ const columns = ["Namn", "Poäng"];
 const Profile = () => {
   const [totalScore, setTotalScore] = useState<number>(0);
   const {user, setUser} = useUser();
-  const navigate = useNavigate(); // För att hantera omdirigering
+  const navigate = useNavigate();
 
   // Hämta alla quizpoäng från localStorage och summera dem
   useEffect(() => {
@@ -27,6 +27,7 @@ const Profile = () => {
 
   const handleLogoutAndRedirect = () => {
     setUser(null); // Ta bort användardata från localStorage
+    localStorage.removeItem('currentUser')
     navigate('/Login'); // Omdirigera till inloggningssidan
   };
 

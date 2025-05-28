@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ShootTheWord.css';
+import { fetchGlosor } from '../../apiService/glosor';
+import { useUser } from '../../Context/UserContext';
 
 interface Glosa {
   id: number;
@@ -10,10 +12,7 @@ interface Glosa {
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const ShootTheWord = () => {
-  // 1. Läs inlogged user från localStorage
-  const stored = localStorage.getItem('currentUser');
-  const user = stored ? JSON.parse(stored) : null;
-
+  const {user} = useUser();
   const [glosor, setGlosor] = useState<Glosa[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [collected, setCollected] = useState<string[]>([]);
@@ -26,18 +25,17 @@ const ShootTheWord = () => {
   // 2. Hämta barnspecifika glosor
   useEffect(() => {
     if (!user?.username) return;
-    const token = localStorage.getItem('token');
-    fetch(`http://localhost:5287/glosor?child=${user.username}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    })
-      .then(res => res.json())
-      .then(data => setGlosor(
-        data.map((g: any) => ({
+    fetchGlosor(user.username)
+      .then(data =>
+        setGlosor(
+          data.map((g: any) => ({
           id: g.id,
           swedish: g.swedish ?? g.Swedish,
           english: g.english ?? g.English
         }))
-      ));
+        )
+      )
+      .catch(err => setMessage(err.message));
   }, [user?.username]);
   
   useEffect(() => {

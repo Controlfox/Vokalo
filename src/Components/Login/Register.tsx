@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import "./Login.css";
 import { User } from '../../Types';
-
-const API = 'http://localhost:5287';
+import { registerUser } from '../../apiService/users';
 
 interface RegisterProps {
   onRegistered: () => void;
@@ -23,25 +22,19 @@ const Register: React.FC<RegisterProps> = ({ onRegistered }) => {
       setErrorMessage('Lösenorden matchade inte!');
       return;
     }
-  
-    const res = await fetch(`${API}/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    
+    try {
+      await registerUser({
         username,
-        password, 
+        password,
         role,
-        ...(role === 'child' ? { parent: parentUsername } : { children: [] })
-      })
-    });
-  
-    if (!res.ok) {
-      setErrorMessage('Kunde inte skapa användare');
-      return;
+        ...(role == 'child' ? {parent: parentUsername} : {children: []})
+      });
+      alert('Användare skapad!');
+      onRegistered();
+    } catch (err: any) {
+      setErrorMessage(err.message);
     }
-  
-    alert('Användare skapad!');
-    onRegistered();
   };
   
 
