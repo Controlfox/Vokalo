@@ -1,34 +1,41 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import "./Profile.css"
-import { User } from '../../Types';
-import ReusableTable from '../ReusableTable';
-import { useUser } from '../../Context/UserContext';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Profile.css";
+import ReusableTable from "../ReusableTable";
+import { useUser } from "../../Context/UserContext";
 
 const mockHighscores = [
-  {Namn: "Lisa", Poäng: 10},
-  {Namn: "Anna", Poäng: 8},
-  {Namn: "Kalle", Poäng: 7},
+  { Namn: "Lisa", Poäng: 10 },
+  { Namn: "Anna", Poäng: 8 },
+  { Namn: "Kalle", Poäng: 7 },
 ];
 
 const columns = ["Namn", "Poäng"];
 
 const Profile = () => {
   const [totalScore, setTotalScore] = useState<number>(0);
-  const {user, setUser} = useUser();
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
 
   // Hämta alla quizpoäng från localStorage och summera dem
   useEffect(() => {
-    const allScores = Object.keys(localStorage).filter(key => key.startsWith('quizScore_'));
-    const total = allScores.reduce((acc, key) => acc + parseInt(localStorage.getItem(key) || '0', 10), 0);
+    const allScores = Object.keys(localStorage).filter((key) =>
+      key.startsWith("quizScore_")
+    );
+    const total = allScores.reduce(
+      (acc, key) => acc + parseInt(localStorage.getItem(key) || "0", 10),
+      0
+    );
     setTotalScore(total);
   }, []);
 
+  /**
+   * Loggar ut användaren och går till login-sidan.
+   */
   const handleLogoutAndRedirect = () => {
     setUser(null); // Ta bort användardata från localStorage
-    localStorage.removeItem('currentUser')
-    navigate('/Login'); // Omdirigera till inloggningssidan
+    localStorage.removeItem("currentUser");
+    navigate("/Login"); // Omdirigera till inloggningssidan
   };
 
   return (
